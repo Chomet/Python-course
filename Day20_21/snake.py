@@ -81,24 +81,28 @@ class Snake:
             if (x, y + 20) not in self.snakepositions:
                 self.snakepositions[0] = (x, y + 20)
             else:
+                self.scores.game_over()
                 return False
         elif self.current_direction == "Right":
             self.snakeparts[0].setpos(x + 20, y)
             if (x + 20, y) not in self.snakepositions:
                 self.snakepositions[0] = (x + 20, y)
             else:
+                self.scores.game_over()
                 return False
         elif self.current_direction == "Down":
             self.snakeparts[0].setpos(x, y - 20)
             if (x, y - 20) not in self.snakepositions:
                 self.snakepositions[0] = (x, y - 20)
             else:
+                self.scores.game_over()
                 return False
         elif self.current_direction == "Left":
             self.snakeparts[0].setpos(x - 20, y)
             if (x - 20, y) not in self.snakepositions:
                 self.snakepositions[0] = (x - 20, y)
             else:
+                self.scores.game_over()
                 return False
         # Body positions will just be last position of body part which is in front of them
         for bodypart in self.snakeparts:
@@ -113,6 +117,7 @@ class Snake:
             self.grow_snake()
         # Check if head made a collision with edges of screen
         if x <= -300 or x >= 300 or y <= -300 or y >= 300:
+            self.scores.game_over()
             return False
         else:
             return True
