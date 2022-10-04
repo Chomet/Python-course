@@ -3,6 +3,7 @@ from tkinter import messagebox  # needed for popup boxes
 import string
 import random
 import pyperclip
+import json  # needed for JSON
 
 window = tkinter.Tk()
 window.title("Password Manager")
@@ -16,11 +17,11 @@ canvas.grid(column=0, row=0, columnspan=3)
 
 # Labels
 websitetk = tkinter.Label(text="Website:", bg="white")
-websitetk.grid(column=0, row=1)
+websitetk.grid(column=0, row=1, padx=2, pady=2)
 emailtk = tkinter.Label(text="Email/Username:", bg="white")
-emailtk.grid(column=0, row=2)
+emailtk.grid(column=0, row=2, padx=2, pady=2)
 passwordtk = tkinter.Label(text="Password:", bg="white")
-passwordtk.grid(column=0, row=3)
+passwordtk.grid(column=0, row=3, padx=2, pady=2)
 
 # Textboxes
 website_entry = tkinter.Entry()
@@ -28,12 +29,13 @@ website_entry = tkinter.Entry()
 # sticky parameter says that object will be "glued" to start of column
 # that object will spread until the end of column (or columnspan) if defined
 # end of each column will be the length of the longest object in that column (minus padding)
-website_entry.grid(column=1, row=1, columnspan=2, sticky="EW")
+website_entry.grid(column=1, row=1, padx=2, pady=2, sticky="EW")
 email_entry = tkinter.Entry()
 email_entry.insert(tkinter.END, string="example@email.com")
-email_entry.grid(column=1, row=2, columnspan=2, sticky="EW")
+email_entry.grid(column=1, row=2, padx=2, pady=2, columnspan=2, sticky="EW")
 password_entry = tkinter.Entry()
-password_entry.grid(column=1, row=3, sticky="EW")
+password_entry.grid(column=1, row=3, padx=2, pady=2, sticky="EW")
+
 
 # Buttons
 
@@ -49,13 +51,19 @@ def password_generation():
 
 
 generate_pw = tkinter.Button(text="Generate Password", command=password_generation)
-generate_pw.grid(column=2, row=3, sticky="EW")
+generate_pw.grid(column=2, row=3, padx=2, pady=2, sticky="EW")
 
 
 def add_entry():
     website = website_entry.get()
     email = email_entry.get()
     password = password_entry.get()
+    new_data = {  # JSON is basically a dictionary so we will fill JSON file with dictionary
+        website: {
+              "email": email,
+              "password": password
+        }
+    }
     if len(website) == 0 or len(email) == 0 or len(password) == 0:
         # Shows warning popup
         messagebox.showwarning(title="Password Manager", message="One or more entries missing!")
@@ -64,8 +72,15 @@ def add_entry():
         if messagebox.askyesno(title="Password Manager", message="Do you want to proceed?"):
             # Shows info popup
             messagebox.showinfo(title="Password Manager", message="Adding entry to database!")
-            with open("passwords.txt", "a+") as file:
-                file.write(f"{website} | {email} | {password}\n")
+            with open("passwords.json", "r") as file:
+                try:
+                    data = json.load(file)  # reading old data from JSON file
+                except:
+                    data = {}
+                data.update(new_data)  # updating old data with new data
+                file.close()
+            with open("passwords.json", "w") as file:
+                json.dump(data, file, indent=4)  # writing updated data in JSON file, indent is sued for prettier format
                 file.close()
             website_entry.delete(0, tkinter.END)
             email_entry.delete(0, tkinter.END)
@@ -73,6 +88,27 @@ def add_entry():
 
 
 add = tkinter.Button(text="Add", command=add_entry)
-add.grid(column=1, row=4, columnspan=2, sticky="EW")
+add.grid(column=1, row=4, padx=2, pady=2, columnspan=2, sticky="EW")
+
+
+def search_website():
+    website = website_entry.get()
+    with open("passwords.json", "r") as file:
+        try:
+            data = json.load(file)
+        except:
+            messagebox.showwarning(title="Password Manager", message="Database is currently empty!")
+        else:
+            if website in data:
+                messagebox.showinfo(title="Password Manager",
+                                    message=f"Website: {website}\n"
+                                            f"Email: {data[website]['email']}\n"
+                                            f"Password: {data[website]['password']}")
+            else:
+                messagebox.showwarning(title="Password Manager", message="No website with this name in database")
+
+
+search = tkinter.Button(text="Search", command=search_website)
+search.grid(column=2, row=1, padx=2, pady=2, sticky="EW")
 
 window.mainloop()
