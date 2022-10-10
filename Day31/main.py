@@ -10,6 +10,10 @@ window.config(padx=50, pady=50, bg=BACKGROUND_COLOR)
 
 french_words = pandas.read_csv("data\\french_words.csv")
 french_words_dict = {data["French"]: data["English"] for (_, data) in french_words.iterrows()}
+# french_words_dict = french_words.to_dict(orient="records")
+# orient: String value, (‘dict’, ‘list’, ‘series’, ‘split’, ‘records’, ‘index’)
+# Defines which dtype to convert Columns(series into).
+# For example, ‘list’ would return a dictionary of lists with Key=Column name and Value=List (Converted series).
 french_image = tkinter.PhotoImage(file="images\\card_front.png")
 english_image = tkinter.PhotoImage(file="images\\card_back.png")
 random_word = ""
@@ -63,7 +67,7 @@ def remember():
         english.append(value)
     newdict = {"French": french, "English": english}
     newdata = pandas.DataFrame(newdict)
-    newdata.to_csv("data\\french_words.csv")
+    newdata.to_csv("data\\french_words.csv", index=False)  # don't include index when saving data
     change_to_french()
 
 
